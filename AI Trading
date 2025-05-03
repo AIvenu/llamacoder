@@ -1,0 +1,37 @@
+import llamacoder as lc  # Assuming LlamaCoder has financial market functions
+import time
+
+# Define indicators for scalping strategy
+def get_scalping_signals(data):
+    vwap = lc.calculate_vwap(data)
+    rsi = lc.calculate_rsi(data)
+    macd = lc.calculate_macd(data)
+    bollinger_bands = lc.calculate_bollinger(data)
+
+    signal = {}
+    
+    # Entry conditions: VWAP bounce + MACD crossover + RSI confirmation
+    if data['price'] > vwap and macd['signal'] > macd['histogram'] and rsi > 30:
+        signal['entry'] = 'BUY'
+        signal['stop_loss'] = data['price'] * 0.995  # 0.5% stop-loss
+        signal['target'] = data['price'] * 1.005  # 0.5% profit
+        signal['type'] = 'Premium Scalping Signal'
+
+    elif data['price'] < vwap and macd['signal'] < macd['histogram'] and rsi < 70:
+        signal['entry'] = 'SELL'
+        signal['stop_loss'] = data['price'] * 1.005  # 0.5% stop-loss
+        signal['target'] = data['price'] * 0.995  # 0.5% profit
+        signal['type'] = 'Premium Scalping Signal'
+
+    return signal
+
+# Run real-time scanning for scalping opportunities
+while True:
+    market_data = lc.fetch_market_data(["NIFTY50", "BANKNIFTY", "SENSEX"])  # Fetch live data
+    
+    for index in market_data:
+        signals = get_scalping_signals(market_data[index])
+        if signals:
+            print(f"🚀 Scalping Signal for {index}: {signals}")
+
+    time.sleep(1)  # Refresh every second
